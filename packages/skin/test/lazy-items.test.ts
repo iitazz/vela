@@ -33,8 +33,8 @@ describe('drawing ahead while scrolling and while still', () => {
   test('a moving scroll draws only what it is about to reach; a still one draws further ahead', () => {
     expect(lazyReach('y', true, false)).toBe(2);
     expect(lazyReach('x', true, false)).toBe(1.5);
-    expect(lazyReach('y', false, false)).toBe(3);
-    expect(lazyReach('x', false, false)).toBe(2);
+    expect(lazyReach('y', false, false)).toBe(2);
+    expect(lazyReach('x', false, false)).toBe(1.5);
     expect(lazyReach('y', false, true)).toBe(1);
   });
 

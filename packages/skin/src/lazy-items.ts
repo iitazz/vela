@@ -33,7 +33,7 @@ export const LAZY_STILL_MS = 200;
 export function lazyReach(axis: 'x' | 'y', moving: boolean, tv: boolean): number {
   if (tv) return 1;
   if (moving) return axis === 'y' ? 2 : 1.5;
-  return axis === 'y' ? 3 : 2;
+  return axis === 'y' ? 2 : 1.5;
 }
 
 /** Items added at once: while still, one at a time for the page's rows (each is a row of cards)
