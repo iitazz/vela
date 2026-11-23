@@ -27,11 +27,12 @@ export const LAZY_STILL_MS = 200;
 
 /** How far past the screen's edge, in screen lengths, items are drawn ahead. Drawing a batch holds
  * the UI thread for a few frames (creating and first drawing a row of cards), so while the viewer
- * scrolls only what the scroll is about to reach is drawn, and once it is still the page draws
+ * scrolls only what the scroll is about to reach (a fling covers two screens in a few frames) is drawn, and once it is still the page draws
  * further ahead, a little at a time, for the next scroll to find. A TV draws only what it reaches:
  * its section switches would wait on the extra rows. */
 export function lazyReach(axis: 'x' | 'y', moving: boolean, tv: boolean): number {
-  if (tv || moving) return 1;
+  if (tv) return 1;
+  if (moving) return axis === 'y' ? 2 : 1.5;
   return axis === 'y' ? 2 : 1.5;
 }
 

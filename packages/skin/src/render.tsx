@@ -914,7 +914,7 @@ function Box({ node, ctx, route, after, hero, measure }: { node: Extract<RNode, 
         contentContainerStyle={contentStyle as ViewStyle} stickyHeaderIndices={sticky?.length ? sticky : undefined}
         refreshControl={route && host.refresh && Platform.OS !== 'web' && !Platform.isTV ? <RefreshControl refreshing={!!host.refreshing} onRefresh={host.refresh} /> : undefined}
         StickyHeaderComponent={NativeStickyHeader}
-        showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={!horizontal && !Platform.isTV} onScroll={onScroll} scrollEventThrottle={64}
+        showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={!horizontal && !Platform.isTV} onScroll={onScroll} scrollEventThrottle={32}
         onLayout={onPagerLayout} onContentSizeChange={onPagerContent}
         {...(web && horizontal && rowId ? { dataSet: { velaRow: rowId } } : {})}
         {...a11y} {...(web && route && (env.route === 'title' || env.route === 'person')
@@ -1251,9 +1251,9 @@ const BOX_SCROLL: ViewStyle = { flexGrow: 0 };
  * drawing every one held a section switch for seconds on a TV box. */
 const lazyRepeats = Platform.OS === 'android';
 const LAZY_REPEATS: Record<string, { axis: 'x' | 'y'; first: number; batch: number } | undefined> = lazyRepeats ? {
-  'home.rows': { axis: 'y', first: 3, batch: 2 },
-  'library.rows': { axis: 'y', first: 3, batch: 2 },
-  'row.items': { axis: 'x', first: 8, batch: 6 },
+  'home.rows': { axis: 'y', first: 4, batch: 2 },
+  'library.rows': { axis: 'y', first: 4, batch: 2 },
+  'row.items': { axis: 'x', first: 10, batch: 6 },
 } : {};
 /** When the route or a row last scrolled (lazily drawn items draw further ahead once it is still),
  * and when still-time drawing last added to the page: one piece at a time, across the page. */
@@ -1269,6 +1269,7 @@ function LazyRepeat({ axis, first, batch, children }: { axis: 'x' | 'y'; first: 
   const [count, setCount] = useState(first);
   const [pitch, setPitch] = useState(0);
   const spacer = useRef<HostInstance>(null);
+  const measuring = useRef(false);
   const counted = useRef(count);
   counted.current = count;
   const total = useRef(children.length);
@@ -1283,7 +1284,11 @@ function LazyRepeat({ axis, first, batch, children }: { axis: 'x' | 'y'; first: 
   const ahead = useCallback(() => {
     const at = counted.current;
     const moving = Date.now() - lazyScrolledAt < LAZY_STILL_MS;
+    // One measurement in flight: scroll events arriving meanwhile would only queue more bridge calls.
+    if (measuring.current || !spacer.current) return;
+    measuring.current = true;
     spacer.current?.measureInWindow((x, y, w, h) => {
+      measuring.current = false;
       // A hidden scene (a retained section behind another) has no size: it draws nothing ahead.
       if (!w && !h) return;
       const rect = { x, y, height: h };
@@ -1365,6 +1370,7 @@ function GridTrack({ grid, rowGap, items }: { grid: NonNullable<Effects['grid']>
   const [drawn, setDrawn] = useState(GRID_FIRST);
   const [rowHeight, setRowHeight] = useState(0);
   const spacer = useRef<HostInstance>(null);
+  const measuring = useRef(false);
   const total = useRef(items.length);
   total.current = items.length;
   const shownRef = useRef(drawn);
@@ -1372,7 +1378,10 @@ function GridTrack({ grid, rowGap, items }: { grid: NonNullable<Effects['grid']>
   const layout = useContext(RouteLayout);
   const ahead = useCallback(() => {
     const at = shownRef.current;
+    if (measuring.current || !spacer.current) return;
+    measuring.current = true;
     spacer.current?.measureInWindow((_x, y, w, h) => {
+      measuring.current = false;
       // A hidden scene (a retained section behind another) has no size: it draws nothing ahead.
       if (!w && !h) return;
       // One batch per drawn state, however many scroll events asked for it.
