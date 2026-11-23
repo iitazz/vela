@@ -914,7 +914,7 @@ function Box({ node, ctx, route, after, hero, measure }: { node: Extract<RNode, 
         contentContainerStyle={contentStyle as ViewStyle} stickyHeaderIndices={sticky?.length ? sticky : undefined}
         refreshControl={route && host.refresh && Platform.OS !== 'web' && !Platform.isTV ? <RefreshControl refreshing={!!host.refreshing} onRefresh={host.refresh} /> : undefined}
         StickyHeaderComponent={NativeStickyHeader}
-        showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={!horizontal && !Platform.isTV} onScroll={onScroll} scrollEventThrottle={16}
+        showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={!horizontal && !Platform.isTV} onScroll={onScroll} scrollEventThrottle={32}
         onLayout={onPagerLayout} onContentSizeChange={onPagerContent}
         {...(web && horizontal && rowId ? { dataSet: { velaRow: rowId } } : {})}
         {...a11y} {...(web && route && (env.route === 'title' || env.route === 'person')
@@ -1251,9 +1251,9 @@ const BOX_SCROLL: ViewStyle = { flexGrow: 0 };
  * drawing every one held a section switch for seconds on a TV box. */
 const lazyRepeats = Platform.OS === 'android';
 const LAZY_REPEATS: Record<string, { axis: 'x' | 'y'; first: number; batch: number } | undefined> = lazyRepeats ? {
-  'home.rows': { axis: 'y', first: 4, batch: 3 },
-  'library.rows': { axis: 'y', first: 4, batch: 3 },
-  'row.items': { axis: 'x', first: 10, batch: 8 },
+  'home.rows': { axis: 'y', first: 4, batch: 2 },
+  'library.rows': { axis: 'y', first: 4, batch: 2 },
+  'row.items': { axis: 'x', first: 10, batch: 6 },
 } : {};
 /** When the route or a row last scrolled (lazily drawn items draw further ahead once it is still),
  * and when still-time drawing last added to the page: one piece at a time, across the page. */
